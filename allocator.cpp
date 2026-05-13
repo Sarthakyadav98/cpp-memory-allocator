@@ -10,13 +10,23 @@ LinearAllocator::~LinearAllocator() {
     delete[] memory_pool;
 }
 
+size_t LinearAllocator::align_forward(size_t address, size_t alignment) {
+    size_t modulo = address % alignment;
+    if (modulo != 0) {
+        address += (alignment - modulo);
+    }
+    return address;
+}
+
 void* LinearAllocator::allocate(size_t size) {
-    if (offset + size > pool_size) {
+    size_t aligned_offset = align_forward(offset, ALIGNMENT);
+    
+    if (aligned_offset + size > pool_size) {
         return nullptr;
     }
     
-    void* ptr = memory_pool + offset;
-    offset += size;
+    void* ptr = memory_pool + aligned_offset;
+    offset = aligned_offset + size;
     return ptr;
 }
 

@@ -5,9 +5,13 @@
 
 class LinearAllocator {
 private:
+    static constexpr size_t ALIGNMENT = 8;
+    
     char* memory_pool;
     size_t pool_size;
     size_t offset;
+    
+    size_t align_forward(size_t address, size_t alignment);
 
 public:
     LinearAllocator(size_t size);
