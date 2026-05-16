@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build Debug",
+            "command": "g++",
+            "args": [
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Wshadow",
+                "-Wformat=2",
+                "-Wcast-align",
+                "-Wconversion",
+                "-Wsign-conversion",
+                "-Wnull-dereference",
+                "-g3",
+                "-O0",
+                "main.cpp",
+                "allocator.cpp",
+                "-o",
+                "build/Debug/outDebug.exe"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}
