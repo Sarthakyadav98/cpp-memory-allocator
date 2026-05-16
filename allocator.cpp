@@ -28,11 +28,39 @@ void* LinearAllocator::allocate(size_t size) {
             // Found a suitable free block
             current->is_free = false;
             
-            // Remove from free list
-            if (prev == nullptr) {
-                free_list = current->next;
+            // Check if we should split the block
+            size_t remaining = current->size - size;
+            size_t min_split_size = sizeof(BlockHeader) + ALIGNMENT;
+            
+            if (remaining >= min_split_size) {
+                // Split the block
+                current->size = size;
+                
+                // Create new free block from remaining space
+                BlockHeader* new_block = reinterpret_cast<BlockHeader*>(
+                    reinterpret_cast<char*>(current) + sizeof(BlockHeader) + size
+                );
+                new_block->size = remaining - sizeof(BlockHeader);
+                new_block->is_free = true;
+                new_block->next = current->next;
+                
+                // Update current block's next pointer
+                current->next = new_block;
+                
+                // Keep new block in free list (don't remove it)
+                if (prev == nullptr) {
+                    free_list = new_block;
+                } else {
+                    prev->next = new_block;
+                }
             } else {
-                prev->next = current->next;
+                // Block too small to split, use entire block
+                // Remove from free list
+                if (prev == nullptr) {
+                    free_list = current->next;
+                } else {
+                    prev->next = current->next;
+                }
             }
             
             return reinterpret_cast<char*>(current) + sizeof(BlockHeader);
