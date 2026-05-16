@@ -25,7 +25,7 @@ public:
     ~LinearAllocator();
     
     void* allocate(size_t size);
-    void free(void* ptr);
+    void deallocate(void* ptr);
     void reset();
     
     size_t get_offset() const;

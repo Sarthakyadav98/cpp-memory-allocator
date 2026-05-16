@@ -62,7 +62,7 @@ void* LinearAllocator::allocate(size_t size) {
 }
 
 
-void LinearAllocator::free(void* ptr) {
+void LinearAllocator::deallocate(void* ptr) {
     if (ptr == nullptr) {
         return;
     }

@@ -35,7 +35,7 @@ int main() {
     
     // Free middle block
     cout << "Freeing num2..." << endl;
-    allocator.free(num2);
+    allocator.deallocate(num2);
     cout << "  Block freed and added to free list\n" << endl;
     
     // Allocate again - should reuse freed block
@@ -66,7 +66,7 @@ int main() {
     
     // Free and reallocate
     cout << "Freeing array..." << endl;
-    allocator.free(arr);
+    allocator.deallocate(arr);
     
     cout << "Allocating Point struct (should reuse array block)..." << endl;
     Point* point = static_cast<Point*>(allocator.allocate(sizeof(Point)));
