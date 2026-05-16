@@ -103,6 +103,35 @@ void LinearAllocator::deallocate(void* ptr) {
     // Mark as free
     header->is_free = true;
     
+    // Try to coalesce with next block if it's adjacent and free
+    BlockHeader* next_block = reinterpret_cast<BlockHeader*>(
+        reinterpret_cast<char*>(header) + sizeof(BlockHeader) + header->size
+    );
+    
+    // Check if next block is within pool bounds and is free
+    char* next_addr = reinterpret_cast<char*>(next_block);
+    if (next_addr < memory_pool + offset && next_block->is_free) {
+        // Merge with next block
+        header->size += sizeof(BlockHeader) + next_block->size;
+        header->next = next_block->next;
+        
+        // Remove next_block from free list
+        BlockHeader* current = free_list;
+        BlockHeader* prev = nullptr;
+        while (current != nullptr) {
+            if (current == next_block) {
+                if (prev == nullptr) {
+                    free_list = current->next;
+                } else {
+                    prev->next = current->next;
+                }
+                break;
+            }
+            prev = current;
+            current = current->next;
+        }
+    }
+    
     // Add to front of free list
     header->next = free_list;
     free_list = header;
