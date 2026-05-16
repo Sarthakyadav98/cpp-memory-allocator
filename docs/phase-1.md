@@ -1,63 +1,25 @@
-V1 — Linear / Bump Allocator
+# Phase 1 — Linear/Bump Allocator ✓
 
-REQUIRED FEATURES
-1. Fixed Memory Pool
+## Implemented Features
 
-Create a fixed-size memory buffer.
+**Core Allocator**
+- Fixed-size memory pool (dynamically allocated)
+- Offset tracking for sequential allocations
+- `allocate(size)` - returns aligned pointer or nullptr
+- `reset()` - clears all allocations instantly
+- Out-of-memory handling
 
-Example:
+**8-Byte Alignment**
+- All allocations aligned to 8-byte boundaries
+- `align_forward()` helper for address alignment
+- Prevents misalignment issues and undefined behavior
 
-char memory_pool[1024];
+**Testing**
+- Allocates int, arrays, and structs
+- Demonstrates contiguous allocation
+- Tests OOM handling and reset functionality
 
-This acts like your own mini heap.
-
-2. Offset Tracker
-
-Keep track of:
-
-how much memory already used
-
-Example:
-
-size_t offset = 0;
-3. allocate(size)
-
-Function:
-
-void* allocate(size_t size)
-
-Behavior:
-
-check remaining memory
-return current free address
-move offset forward
-4. Out-of-Memory Handling
-
-If request exceeds pool:
-
-return nullptr
-5. reset()
-
-Function:
-
-void reset()
-
-Resets allocator completely.
-
-Like:
-
-free all allocations at once
-6. Testing
-
-Allocate:
-
-int
-arrays
-structs
-
-Print:
-
-addresses
-offsets
-
-Observe contiguous allocation.
+## Files
+- `allocator.h` - LinearAllocator class definition
+- `allocator.cpp` - Implementation with alignment
+- `main.cpp` - Comprehensive demo
