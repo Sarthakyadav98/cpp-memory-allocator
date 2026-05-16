@@ -11,7 +11,11 @@ int main() {
     LinearAllocator allocator(1024);
     
     cout << "=== Free List Allocator Demo ===" << endl;
-    cout << "Pool size: 1024 bytes\n" << endl;
+    cout << "Pool size: 1024 bytes" << endl;
+    cout << "BlockHeader size: " << sizeof(BlockHeader) << " bytes" << endl;
+    cout << "sizeof(size_t): " << sizeof(size_t) << endl;
+    cout << "sizeof(bool): " << sizeof(bool) << endl;
+    cout << "sizeof(BlockHeader*): " << sizeof(BlockHeader*) << "\n" << endl;
     
     // Allocate some blocks
     cout << "Allocating 3 integers..." << endl;
