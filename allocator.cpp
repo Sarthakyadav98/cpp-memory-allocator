@@ -20,13 +20,21 @@ size_t LinearAllocator::align_forward(size_t address, size_t alignment) {
 
 void* LinearAllocator::allocate(size_t size) {
     size_t aligned_offset = align_forward(offset, ALIGNMENT);
+    size_t total_size = sizeof(BlockHeader) + size;
     
-    if (aligned_offset + size > pool_size) {
+    if (aligned_offset + total_size > pool_size) {
         return nullptr;
     }
     
-    void* ptr = memory_pool + aligned_offset;
-    offset = aligned_offset + size;
+    // Create header
+    BlockHeader* header = reinterpret_cast<BlockHeader*>(memory_pool + aligned_offset);
+    header->size = size;
+    header->is_free = false;
+    header->next = nullptr;
+    
+    // Return pointer to user memory (after header)
+    void* ptr = memory_pool + aligned_offset + sizeof(BlockHeader);
+    offset = aligned_offset + total_size;
     return ptr;
 }
 

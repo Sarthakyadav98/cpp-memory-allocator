@@ -3,6 +3,12 @@
 
 #include <cstddef>
 
+struct BlockHeader {
+    size_t size;
+    bool is_free;
+    BlockHeader* next;
+};
+
 class LinearAllocator {
 private:
     static constexpr size_t ALIGNMENT = 8;
