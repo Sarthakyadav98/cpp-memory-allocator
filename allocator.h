@@ -16,6 +16,7 @@ private:
     char* memory_pool;
     size_t pool_size;
     size_t offset;
+    BlockHeader* free_list;
     
     size_t align_forward(size_t address, size_t alignment);
 
@@ -24,6 +25,7 @@ public:
     ~LinearAllocator();
     
     void* allocate(size_t size);
+    void free(void* ptr);
     void reset();
     
     size_t get_offset() const;

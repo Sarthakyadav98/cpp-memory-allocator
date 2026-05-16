@@ -10,26 +10,46 @@ struct Point {
 int main() {
     LinearAllocator allocator(1024);
     
-    cout << "=== Linear Allocator Demo ===" << endl;
+    cout << "=== Free List Allocator Demo ===" << endl;
     cout << "Pool size: 1024 bytes\n" << endl;
     
-    // Allocate an int
-    cout << "Allocating int (4 bytes)..." << endl;
-    int* num = static_cast<int*>(allocator.allocate(sizeof(int)));
-    if (num) {
-        *num = 42;
-        cout << "  Address: " << num << endl;
-        cout << "  Value: " << *num << endl;
-        cout << "  Offset: " << allocator.get_offset() << endl;
-        cout << "  Remaining: " << allocator.get_remaining() << " bytes\n" << endl;
+    // Allocate some blocks
+    cout << "Allocating 3 integers..." << endl;
+    int* num1 = static_cast<int*>(allocator.allocate(sizeof(int)));
+    int* num2 = static_cast<int*>(allocator.allocate(sizeof(int)));
+    int* num3 = static_cast<int*>(allocator.allocate(sizeof(int)));
+    
+    if (num1 && num2 && num3) {
+        *num1 = 10;
+        *num2 = 20;
+        *num3 = 30;
+        cout << "  num1: " << *num1 << " at " << num1 << endl;
+        cout << "  num2: " << *num2 << " at " << num2 << endl;
+        cout << "  num3: " << *num3 << " at " << num3 << endl;
+        cout << "  Offset: " << allocator.get_offset() << " bytes\n" << endl;
     }
     
-    // Allocate an array
-    cout << "Allocating int array[5] (20 bytes)..." << endl;
+    // Free middle block
+    cout << "Freeing num2..." << endl;
+    allocator.free(num2);
+    cout << "  Block freed and added to free list\n" << endl;
+    
+    // Allocate again - should reuse freed block
+    cout << "Allocating new integer (should reuse freed block)..." << endl;
+    int* num4 = static_cast<int*>(allocator.allocate(sizeof(int)));
+    if (num4) {
+        *num4 = 40;
+        cout << "  num4: " << *num4 << " at " << num4 << endl;
+        cout << "  Same address as num2? " << (num4 == num2 ? "YES" : "NO") << endl;
+        cout << "  Offset unchanged: " << allocator.get_offset() << " bytes\n" << endl;
+    }
+    
+    // Allocate array
+    cout << "Allocating int array[5]..." << endl;
     int* arr = static_cast<int*>(allocator.allocate(sizeof(int) * 5));
     if (arr) {
         for (int i = 0; i < 5; i++) {
-            arr[i] = i * 10;
+            arr[i] = i * 100;
         }
         cout << "  Address: " << arr << endl;
         cout << "  Values: ";
@@ -37,44 +57,27 @@ int main() {
             cout << arr[i] << " ";
         }
         cout << endl;
-        cout << "  Offset: " << allocator.get_offset() << endl;
-        cout << "  Remaining: " << allocator.get_remaining() << " bytes\n" << endl;
+        cout << "  Offset: " << allocator.get_offset() << " bytes\n" << endl;
     }
     
-    // Allocate a struct
-    cout << "Allocating Point struct (8 bytes)..." << endl;
+    // Free and reallocate
+    cout << "Freeing array..." << endl;
+    allocator.free(arr);
+    
+    cout << "Allocating Point struct (should reuse array block)..." << endl;
     Point* point = static_cast<Point*>(allocator.allocate(sizeof(Point)));
     if (point) {
         point->x = 100;
         point->y = 200;
-        cout << "  Address: " << point << endl;
-        cout << "  Value: (" << point->x << ", " << point->y << ")" << endl;
-        cout << "  Offset: " << allocator.get_offset() << endl;
-        cout << "  Remaining: " << allocator.get_remaining() << " bytes\n" << endl;
+        cout << "  Point: (" << point->x << ", " << point->y << ") at " << point << endl;
+        cout << "  Reused freed block\n" << endl;
     }
     
-    // Test out-of-memory
-    cout << "Attempting to allocate 2000 bytes (exceeds pool)..." << endl;
-    void* large = allocator.allocate(2000);
-    if (!large) {
-        cout << "  Allocation failed: Out of memory (returned nullptr)\n" << endl;
-    }
-    
-    // Reset allocator
+    // Test reset
     cout << "Resetting allocator..." << endl;
     allocator.reset();
-    cout << "  Offset after reset: " << allocator.get_offset() << endl;
-    cout << "  Remaining after reset: " << allocator.get_remaining() << " bytes\n" << endl;
-    
-    // Allocate after reset
-    cout << "Allocating int after reset..." << endl;
-    int* new_num = static_cast<int*>(allocator.allocate(sizeof(int)));
-    if (new_num) {
-        *new_num = 99;
-        cout << "  Address: " << new_num << endl;
-        cout << "  Value: " << *new_num << endl;
-        cout << "  Offset: " << allocator.get_offset() << endl;
-    }
+    cout << "  Offset: " << allocator.get_offset() << endl;
+    cout << "  Free list cleared" << endl;
     
     return 0;
 }

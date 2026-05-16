@@ -1,10 +1,14 @@
-# Phase 2 — Block Metadata (Foundation for Free List)
+# Phase 2 — Free List Allocator
 
 ## Concept
-Each allocation now has metadata stored before the user memory:
+Transform linear allocator into free list allocator by:
+1. Adding block metadata (header before each allocation)
+2. Maintaining linked list of free blocks
+3. Implementing deallocation
 
+## Memory Layout
 ```
-[HEADER][USER MEMORY]
+[HEADER|USER DATA][HEADER|USER DATA][HEADER|USER DATA]...
 ```
 
 ## BlockHeader Structure
@@ -12,27 +16,37 @@ Each allocation now has metadata stored before the user memory:
 struct BlockHeader {
     size_t size;        // Size of user memory
     bool is_free;       // Is this block free?
-    BlockHeader* next;  // Pointer to next block
+    BlockHeader* next;  // Pointer to next free block
 };
 ```
 
-## Memory Layout
+## Free List
+Linked list tracking all freed blocks:
 ```
-Before (Linear only):
-[USER DATA][USER DATA][USER DATA]...
-
-After (With headers):
-[HEADER|USER DATA][HEADER|USER DATA][HEADER|USER DATA]...
+free_list -> [Free Block] -> [Free Block] -> [Free Block] -> nullptr
 ```
 
-## Changes
-- `allocate()` now creates a header before returning user pointer
-- Total allocation = `sizeof(BlockHeader) + requested_size`
-- User gets pointer to memory after the header
-- Header tracks size, free status, and next block
+## Implementation
+
+**allocate(size)**
+1. Search free list for suitable block (first-fit)
+2. If found: mark as used, remove from free list, return
+3. If not found: allocate new block from pool
+
+**free(ptr)**
+1. Get header from user pointer (ptr - sizeof(BlockHeader))
+2. Mark block as free
+3. Add to front of free list
+
+**reset()**
+- Clears offset and free list
+
+## Benefits
+- Memory reuse: freed blocks can be reallocated
+- No memory waste from abandoned allocations
+- Foundation for more advanced allocators (best-fit, buddy system)
 
 ## Next Steps
-This prepares for:
-- `free()` function (mark blocks as free)
-- Free list traversal (using next pointers)
-- Block reuse (find and reuse free blocks)
+- Add block coalescing (merge adjacent free blocks)
+- Implement best-fit or worst-fit strategies
+- Add fragmentation metrics
